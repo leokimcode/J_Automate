@@ -6,37 +6,46 @@ from openpyxl import load_workbook
 import openpyxl as xl
 from shutil import copyfile
 import shutil
-
+import os.path
+from os import path
 #-----------------------------Create copies of needed files-------------------------------#
 year = "2022"
 month = '02' #keep these to two digits eg: feb = 02
-daysinmonth = 2
+startdate = 1 #start date of the mont
+daysinmonth = 4 #the final date that you want processed
 
 #---------------------------Read and write on the files--------------%
 
 ## Copying Financial Totals to template sheet
 
-for i in range(1, daysinmonth + 1):
-    
+for i in range(startdate, daysinmonth + 1):
+
     date = str("0" + str(i))
 
-    savefilemame = str(year + '-' + month + '-' + date + "Daily Sales.xlsx")
-    shutil.copy("DailySalesTest.xlsx", savefilemame)
+    savefilename = str(year + '-' + month + '-' + date + " Daily Sales.xlsx")
+    shutil.copy("TemplateDaSa.xlsx", savefilename)
 
-    book = load_workbook(savefilemame)
+    book = load_workbook(savefilename)
 
-    writer = pd.ExcelWriter(savefilemame, engine='openpyxl', mode = 'a', if_sheet_exists="replace")
+    writer = pd.ExcelWriter(savefilename, engine='openpyxl', mode = 'a', if_sheet_exists="replace")
     writer.book = book
     writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
 
     filename = str(year + '-' + month + '-' + date + ' Financial Totals.csv') ##2022-02-01 Financial Totals
     rows = []
 
-    with open(filename, 'r') as file:
-        csvreader = csv.reader(file)
-        header = next(csvreader)
-        for row in csvreader:
-            rows.append(row)
+    #check if file for the respective date exists
+    try:
+        with open(filename, 'r') as file:
+            csvreader = csv.reader(file)
+            header = next(csvreader)
+            for row in csvreader:
+                rows.append(row)
+
+    except:
+        writer.close()
+        os.remove(savefilename)
+        pass
 
     df = pd.DataFrame(rows)
     data = df.drop([0, 1, 2])
@@ -89,6 +98,4 @@ for i in range(1, daysinmonth + 1):
 
     writer.save()
     writer.close()
-
-        
 
