@@ -2,6 +2,7 @@ import csv
 import pandas as pd
 from openpyxl import load_workbook
 import openpyxl as xl
+from shutil import copyfile
 
 #date variables
 year = "2022"
@@ -15,6 +16,7 @@ writer = pd.ExcelWriter('MasterTest.xlsx', engine='xlsxwriter')
 
 filename = year + '-' + month + '-' + date + ' Financial Totals.csv'
 rows = []
+
 
 with open(filename, 'r') as file:
     csvreader = csv.reader(file)
@@ -58,20 +60,3 @@ data2.to_excel(writer, sheet_name = "Staff Performance Overview", index = False,
 
 #------------ Save writer --------------#
 writer.save()
-
-#---------------- Copying "Entry" into new excel file ---------------#
-
-path1 = "EntryTemplate.xlsx"
-path2 = "MasterTest.xlsx"
-
-wb1 = xl.load_workbook(filename = path1)
-ws1 = wb1.worksheets[0]
-
-wb2 = xl.load_workbook(filename = path2)
-ws2 = wb2.create_sheet(ws1.title)
-
-for row in ws1:
-    for cell in row:
-        ws2[cell.coordinate].value = cell.value
-
-wb2.save(path2)
